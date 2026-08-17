@@ -2,7 +2,7 @@
   "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
   "name": "@c2d/branca",
   "description": "Authenticated and encrypted API tokens for Deno using modern cryptography.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "exports": "./main.ts",
   "imports": {
     "@noble/ciphers": "jsr:@noble/ciphers@^2.3.0",
