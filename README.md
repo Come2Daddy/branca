@@ -36,7 +36,7 @@ new Branca(key: string)
 Create a new `Branca` instance with a 32-byte (256-bit) secret key provided as a hex string.
 
 ```ts
-import Branca from "main.ts";
+import Branca from "@c2d/branca";
 
 const branca = new Branca(
   "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -116,7 +116,7 @@ console.log(payload); // "my secret payload"
 ### With TTL validation
 
 ```ts
-import Branca from "./main.ts";
+import Branca from "@c2d/branca";
 
 const branca = new Branca(
   "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -135,7 +135,7 @@ try {
 ### Inspecting token timestamp
 
 ```ts
-import Branca from "./main.ts";
+import Branca from "@c2d/branca";
 
 const branca = new Branca(
   "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
