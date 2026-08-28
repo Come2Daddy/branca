@@ -55,9 +55,10 @@ class Branca {
    * Create a new Branca instance with the given secret key.
    *
    * @param key - A 32-byte secret key provided as a lowercase hex string (64 characters).
-   * @throws {Error} If the key length does not match the required 32 bytes.
+   * @throws {Error} If the key length isn't a string or doesn't match the required bytes length.
    */
   constructor(key: string) {
+    if ("string" !== typeof key) throw new Error("Key must be a string");
     if (key.length != xchacha20poly1305.blockSize)
       throw new Error(
         `Invalid key - Expected length is ${xchacha20poly1305.blockSize}`,
@@ -77,15 +78,31 @@ class Branca {
    * and the encrypted payload authenticated with XChaCha20-Poly1305 AEAD.
    *
    * @param payload - The data to encrypt. Accepts a string or raw bytes.
-   * @param timestamp - Optional Unix timestamp in seconds. Defaults to current time.
-   *                    Must be between 0 and 4294967295.
+   * @param timestamp - Optional One of
+   *                      * Unix timestamp in seconds. Defaults to current time.
+   *                        Must be between 0 and 4294967295.
+   *                      * Date instance
    * @returns A base62-encoded Branca token string.
-   * @throws {Error} If the timestamp is out of valid range.
+   * @throws {Error} If
+   *                    * the payload is not a string nor raw bytes
+   *                    * the timestamp is neither a number nor a Date instance nor undefined
+   *                    * the timestamp is out of valid range.
    */
-  encode(payload: string | Uint8Array, timestamp?: number): string {
+  encode(payload: string | Uint8Array, timestamp?: number | Date): string {
+    if ("string" !== typeof payload && !(payload instanceof Uint8Array))
+      throw new Error("Payload must be a string");
+    if (
+      undefined !== timestamp &&
+      "number" !== typeof timestamp &&
+      !(timestamp instanceof Date)
+    )
+      throw new Error("Timestamp must be a number or a Date instance");
     const nonce = this.nonce || randomBytes(Branca.NONCE_LENGTH);
 
-    const tokenTimestamp = timestamp ?? Math.floor(Date.now() / 1000);
+    const tokenTimestamp =
+      (timestamp instanceof Date
+        ? Math.floor(timestamp.getTime() / 1000)
+        : timestamp) ?? Math.floor(Date.now() / 1000);
 
     if (tokenTimestamp < 0 || tokenTimestamp > 0xffffffff)
       throw new Error("Invalid timestamp");
@@ -117,9 +134,16 @@ class Branca {
    * @param token - The base62-encoded Branca token to decode.
    * @param ttl - Optional maximum token age in seconds. Omit to skip expiration checks.
    * @returns The decrypted payload as a UTF-8 string.
-   * @throws {Error} If the token version is invalid, TTL check fails, or decryption fails.
+   * @throws {Error} If
+   *                    * the token isn't a string
+   *                    * the TTL isn't a number nor undefined
+   *                    * the token version is invalid, TTL check fails, or decryption fails.
    */
   decode(token: string, ttl?: number): string {
+    if ("string" !== typeof token) throw new Error("Token must be a string");
+    if (undefined !== ttl && "number" !== typeof ttl)
+      throw new Error("TTL must be a number");
+
     const buffer = this.base.decode(token);
     const header = buffer.slice(0, Branca.HEADER_LENGTH);
     const cipherText = buffer.slice(Branca.HEADER_LENGTH);
@@ -151,8 +175,16 @@ class Branca {
    *
    * @param token - The base62-encoded Branca token to inspect.
    * @returns The Unix timestamp (seconds) stored in the token header.
+   *
+   * @throws {Error} If
+   *                    * the token isn't a string
+   *                    * the token is an empty string
    */
   timestamp(token: string): number {
+    if ("string" !== typeof token) throw new Error("Token must be a string");
+    if (token.trim().length === 0)
+      throw new Error("Token must not be an empty string");
+
     const binary = this.base.decode(token);
     const header = binary.slice(0, Branca.HEADER_LENGTH);
     const { timestamp } = this.unpack(header);

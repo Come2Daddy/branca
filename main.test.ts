@@ -12,6 +12,10 @@ class BrancaTest extends Branca {
   }
 }
 
+const commonBranca = new Branca(
+  "73757065727365637265746b6579796f7573686f756c646e6f74636f6d6d6974",
+);
+
 const testVectors = {
   version: "0.3.0",
   numberOfTests: 25,
@@ -369,6 +373,51 @@ Deno.test(`Test vectors ${testVectors.version}`, async (test) => {
       });
     }
   }
+});
+
+Deno.test("Implementation and edge cases", async (test) => {
+  await test.step("Wrong key type should fail", () => {
+    // @ts-ignore Omitting type restriction
+    assertThrows(() => new Branca(32));
+  });
+
+  await test.step("Wront type for payload should fail", () => {
+    // @ts-ignore Omitting type restriction
+    assertThrows(() => commonBranca.encode(true, -8));
+  });
+
+  await test.step("Wront type for timestamp should fail", () => {
+    // @ts-ignore Omitting type restriction
+    assertThrows(() => commonBranca.encode("ok", "12"));
+  });
+
+  await test.step("Out of boundaries timestamp should fail", () => {
+    assertThrows(() => commonBranca.encode("ok", -8));
+  });
+
+  await test.step("Encode with timestamp as number", () => {
+    const token = commonBranca.encode("payload", 123206400);
+
+    expect(commonBranca.timestamp(token)).toEqual(123206400);
+  });
+
+  await test.step("Encode with timestamp as a date", () => {
+    const date = new Date(123206400000);
+
+    const token = commonBranca.encode("payload", date);
+
+    expect(commonBranca.timestamp(token)).toEqual(123206400);
+  });
+
+  await test.step("Wront type for token should fail", () => {
+    // @ts-ignore Omitting type restriction
+    assertThrows(() => commonBranca.decode(["ok"]));
+  });
+
+  await test.step("Wront type for ttl should fail", () => {
+    // @ts-ignore Omitting type restriction
+    assertThrows(() => commonBranca.decode("token", true));
+  });
 });
 
 new TextDecoder().decode(Uint8Array.from([80]));
