@@ -4,6 +4,9 @@
   "description": "Authenticated and encrypted API tokens for Deno using modern cryptography.",
   "version": "0.2.0",
   "exports": "./main.ts",
+  "tasks": {
+    "test": "deno test -A --coverage=cov_profile && deno coverage cov_profile --detailed --threshold=100 && rm -rf cov_profile"
+  },
   "imports": {
     "@noble/ciphers": "jsr:@noble/ciphers@^2.3.0",
     "@sck/bitpacker": "jsr:@sck/bitpacker@^0.3.2",
