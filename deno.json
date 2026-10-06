@@ -2,7 +2,7 @@
   "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
   "name": "@c2d/branca",
   "description": "Authenticated and encrypted API tokens for Deno using modern cryptography.",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "exports": "./main.ts",
   "tasks": {
     "test": "deno test -A --coverage=cov_profile && deno coverage cov_profile --detailed --threshold=100 && rm -rf cov_profile"
